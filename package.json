@@ -3,8 +3,16 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "bluebird": "^3.5.0",
+    "es6-promise": "^4.1.1",
+    "isomorphic-fetch": "^2.2.1",
+    "lodash": "^4.17.4",
+    "moment": "^2.18.1",
+    "momentjs": "^2.0.0",
     "react": "^15.6.1",
-    "react-dom": "^15.6.1"
+    "react-bootstrap": "^0.31.2",
+    "react-dom": "^15.6.1",
+    "react-popupbox": "^2.0.1"
   },
   "devDependencies": {
     "react-scripts": "1.0.12"
