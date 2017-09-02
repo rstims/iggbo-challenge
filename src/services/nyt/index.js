@@ -15,8 +15,8 @@ export default class{
   get(options = {}) {
     try{
       const reqOptions = {
-        ...options,
         category:'home',
+        ...options,
       };
       reqOptions.method = 'GET';
       return this.fetch(reqOptions)

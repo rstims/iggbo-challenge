@@ -16,7 +16,7 @@ export default class Article extends Component{
     this.renderImage         = this.renderImage.bind(this);  
     this.renderBody          = this.renderBody.bind(this);  
 
-    this.imageFormat = 'superJumbo';
+    this.imageFormat = 'mediumThreeByTwo210';
 
     this.state = {
       toolTipIsOpen: false 
@@ -24,8 +24,10 @@ export default class Article extends Component{
   }
 
   getDate() {
-    const date = _.get(this.props,"created_date",undefined);
-    return moment.tz(date, "Pacific/Fiji").format("M/DD/YYYY H:mm A FJT"); 
+    const date   = _.get(this.props,"created_date",undefined);
+    const format = `M/DD/YYYY h:mm A ${this.props.timezone === 'Pacific/Fiji' ? 'FJT' : 'z'}`;
+
+    return moment.tz(date, this.props.timezone).format(format); 
   }
 
   handleToggleTooltip() {
