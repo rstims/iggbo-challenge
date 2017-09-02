@@ -1,7 +1,7 @@
 import React, { 
   Component 
 }                 from 'react';
-import * as RBS   from 'react-bootstrap'; 
+import * as RBS  from 'reactstrap';
 import _          from 'lodash'; 
 import Bluebird   from 'bluebird'; 
 
@@ -22,12 +22,14 @@ class App extends Component {
 
     this.renderHeader        = this.renderHeader.bind(this);  
     this.renderArticles      = this.renderArticles.bind(this);  
+    this.renderArticle       = this.renderArticle.bind(this);  
     this.renderLoader        = this.renderLoader.bind(this);  
 
     // Intantiate NYT Service
     this.nyt                 = new nyt();
 
-    this.pageSize = 10;
+    this.pageSize   = 10;
+    this.gridSize   = 3;
   }
 
   componentDidMount() {
@@ -53,37 +55,63 @@ class App extends Component {
   }
 
   renderHeader() {
-    return <div></div>; 
+    return <div>
+      <FormGroup>
+          <Label for="exampleSelect">Select</Label>
+          <Input type="select" name="select" id="exampleSelect">
+            <option>1</option>
+            <option>2</option>
+            <option>3</option>
+            <option>4</option>
+            <option>5</option>
+          </Input>
+      </FormGroup>
+    </div>; 
   }
 
-  renderArticle(article, idx) {
-    
-    return <Article 
-      key={idx} 
-      {...article} 
-    />; 
+  renderArticle(acc, article, idx) {
+    if(_.has(article,"multimedia[0].url") && acc.length < this.pageSize){
+      acc.push(<Article idx={idx} {...article} />);
+    }
+    return acc;
+  }
+
+  renderCardGroup(group) {
+    return <RBS.CardGroup>{group}</RBS.CardGroup>; 
   }
 
   renderArticles() {
     console.log(this.state.articles);
-    const articles = this.state.articles.map(this.renderArticle); 
 
-    return <div>
-      {articles}
-    </div>;
+    const articles = _(this.state.articles);
+
+    // Since no stipulation was set on showing all the articles
+    // I strip out the imageless articles for consistency, hence REDUCE
+    // Chunk based on the grid size
+    return <RBS.Row>
+      {
+        articles
+        .chain()
+        .shuffle()
+        .reduce(this.renderArticle, [])
+        .chunk(this.gridSize)
+        .map(this.renderCardGroup)
+        .value()
+      }
+    </RBS.Row>;
   }
 
   render() {
     return (
-      <RBS.Grid className="articles">
+      <RBS.Container className="articles">
         <RBS.Row>
-          <RBS.Col sm={8} smOffset={2} lg={6} lgOffset={3} >
+          <RBS.Col xs="12">
             {!this.state.articles.length && this.renderLoader()}
             {this.state.articles.length > 0 && this.renderHeader()}
             {this.state.articles.length > 0&& this.renderArticles()}
           </RBS.Col>
         </RBS.Row> 
-      </RBS.Grid> 
+      </RBS.Container> 
     );
   }
 }

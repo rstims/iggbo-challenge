@@ -2,6 +2,10 @@
   margin-top:50px;
 }
 
+.articles .card-group{
+  margin-bottom:30px;
+}
+
 /* Loader */
 .spinner {
   width: 40px;
