@@ -11,31 +11,26 @@ export default class Article extends Component{
   constructor(props){
     super(props); 
 
-    this.getDate             = this.getDate.bind(this);  
-    this.handleToggleTooltip = this.handleToggleTooltip.bind(this);
-    this.renderImage         = this.renderImage.bind(this);  
-    this.renderBody          = this.renderBody.bind(this);  
-
-    this.imageFormat = 'mediumThreeByTwo210';
-
     this.state = {
       toolTipIsOpen: false 
     };
+
   }
 
-  getDate() {
+  getDate = () => {
     const date   = _.get(this.props,"created_date",undefined);
+    // FJT isn't part of the moment timezone database
     const format = `M/DD/YYYY h:mm A ${this.props.timezone === 'Pacific/Fiji' ? 'FJT' : 'z'}`;
 
     return moment.tz(date, this.props.timezone).format(format); 
   }
 
-  handleToggleTooltip() {
+  handleToggleTooltip = () => {
     this.setState({toolTipIsOpen: !this.state.toolTipIsOpen}); 
   }
 
-  renderImage() {
-    const image = _(this.props.multimedia).chain().filter({ format: this.imageFormat }).get("[0]",null).value();
+  renderImage = () => {
+    const image = _(this.props.multimedia).chain().filter({ format: this.props.imageFormat }).get("[0]",null).value();
 
     return <div>
       <RBS.CardImg id={`Tooltip-${this.props.idx}`} top width="100%" src={image.url} alt={image.caption} /> 
@@ -51,11 +46,11 @@ export default class Article extends Component{
     </div>;
   }
 
-  renderBody() {
+  renderBody = () => {
     const abstrct = _.get(this.props,"abstract",null); 
-    const url     = _.get(this.props,"url",null); 
     const section = _.get(this.props,"section",null); 
     const title   = _.get(this.props,"title",null); 
+    const url     = _.get(this.props,"url",null); 
 
     return <RBS.CardBlock>
       <RBS.CardTitle>{section}</RBS.CardTitle>

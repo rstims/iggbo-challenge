@@ -1,4 +1,4 @@
-import React, { 
+import React, {
   Component 
 }                 from 'react';
 import * as RBS   from 'reactstrap';
@@ -21,29 +21,23 @@ class App extends Component {
       count:0,
       articleIsOpen:[], 
       timezone:'Pacific/Fiji',
+      searchTerm:'',
+      imageFormat:'mediumThreeByTwo210',
     };
-
-    this.getArticles           = this.getArticles.bind(this);
-    this.handleSectionChange   = this.handleSectionChange.bind(this);
-    this.handleTimezoneChange  = this.handleTimezoneChange.bind(this);
-    this.renderHeader          = this.renderHeader.bind(this);  
-    this.renderArticles        = this.renderArticles.bind(this);  
-    this.renderArticle         = this.renderArticle.bind(this);  
-    this.renderLoader          = this.renderLoader.bind(this);  
 
     // Intantiate NYT Service
     this.nyt                 = new nyt();
 
-    this.pageSize    = 10;
-    this.gridSize    = 3;
-    this.pseudoDelay = 700;
+    this.pageSize     = 9;
+    this.gridSize     = 3;
+    this.pseudoDelay  = 700;
   }
 
   componentDidMount() {
     return setTimeout(() => this.getArticles(), this.pseudoDelay);
   }
 
-  getArticles(category = "home") {
+  getArticles = (category = "home") => {
     const options = {
      category 
     };
@@ -63,25 +57,33 @@ class App extends Component {
       });
   }
 
-  handleSectionChange(evt) {
+  handleSearchChange = (evt) => {
+    const searchTerm  = _.get(evt,"target.value","");
+
+    return this.setState({
+      searchTerm,
+    }); 
+  }
+
+  handleSectionChange = (evt) => {
     const section = _.get(evt,"target.value","home");
     this.setState({isLoading:true})
     return setTimeout(() => this.getArticles(section), this.pseudoDelay);
   }
 
-  handleTimezoneChange(evt) {
+  handleTimezoneChange = (evt) => {
     const timezone = _.get(evt,"target.value","Pacific/Fiji");
     return this.setState({timezone});
   }
 
-  renderLoader() {
+  renderLoader = () => {
     return <div className="spinner">
       <div className="double-bounce1"></div>
       <div className="double-bounce2"></div>
     </div>;
   }
 
-  renderHeader() {
+  renderHeader = () => {
     const categoriesOptions = _.map(categories, (c,i) => <option key={i} value={c.id}>{c.label}</option>);
     const timzoneOptions    = _.map(moment.tz.names(), (t,i) => <option key={i} value={t}>{t}</option>);
 
@@ -108,16 +110,38 @@ class App extends Component {
           </RBS.Input>
         </RBS.FormGroup>
       </RBS.Col>
+      <RBS.Col xs="12">
+        <RBS.FormGroup>
+          <RBS.Label for="search-term-text">Search</RBS.Label>
+          <RBS.Input 
+            onChange={this.handleSearchChange}
+            value={this.state.searchTerm} 
+            name="searchTerm" 
+            id="search-term-text"
+            placeholder="Start typing..."
+          />
+        </RBS.FormGroup>
+      </RBS.Col>
     </RBS.Row>; 
   }
 
-  renderArticle(acc, article, idx) {
+  renderSearchArticle = (acc, article, idx) => {
+    const searchChecker = (prop) => prop.toLowerCase && prop.toLowerCase().indexOf(this.state.searchTerm.toLowerCase()) > -1;
+
+    if(_.some(article,searchChecker)){
+      return this.renderArticle(acc, article, idx); 
+    }
+    return acc;
+  }
+
+  renderArticle = (acc, article, idx) => {
     if(_.has(article,"multimedia[0].url") && acc.length < this.pageSize){
       acc.push(
         <Article 
           key={idx} 
           idx={idx} 
           timezone={this.state.timezone}
+          imageFormat={this.state.imageFormat}
           {...article} 
         />
       );
@@ -125,27 +149,39 @@ class App extends Component {
     return acc;
   }
 
-  renderCardGroup(group, idx) {
+  renderCardGroup = (group, idx) => {
+    if(group.length < this.gridSize){
+      const diff = this.gridSize - group.length;
+      for(let i = 0;i < diff;i++){
+        group.push(<RBS.Card key={Math.random()} className="no-border">{null}</RBS.Card>);  
+      } 
+    }
     return <RBS.CardGroup key={idx}>{group}</RBS.CardGroup>; 
   }
 
-  renderArticles() {
+  renderNoResults = () => {
+    return <div>Nothing found.</div>; 
+  }
 
-    // Wrap articles for chain
-    const articles = _(this.state.articles);
+  renderArticles = () => {
+
+    // Wrap articles and start chain
+    const articlesChain = _(this.state.articles).chain()
 
     // Since no stipulation was set on showing all the articles
     // I strip out the imageless articles for consistency, hence REDUCE
+    // If a searchterm is present I reduce through there instead
     // Chunk based on the grid size
     // Finally, throw each chunk into a card group
+    const articles = this.state.searchTerm.length > 2 ? 
+      articlesChain.reduce(this.renderSearchArticle, []) : 
+      articlesChain.reduce(this.renderArticle, []);
+    
+    const results = articles.chunk(this.gridSize).map(this.renderCardGroup).value();
+
     return <RBS.Row> 
       {
-        articles
-        .chain()
-        .reduce(this.renderArticle, [])
-        .chunk(this.gridSize)
-        .map(this.renderCardGroup)
-        .value()
+        results.length > 0 ? results : this.renderNoResults()
       } 
     </RBS.Row>;
   }
