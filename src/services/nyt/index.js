@@ -4,9 +4,9 @@ export default class{
 
   constructor() {
     // Base url for nyt api
-    this._baseUrl = 'https://api.nytimes.com/svc/topstories/v2';
+    this._baseUrl = process.env.REACT_APP_NYT_API_URL;
     // Api key for nyt api
-    this._apiKey = '3adc832186c84176af5c0a59d707b1ce';
+    this._apiKey = process.env.REACT_APP_NYT_API_KEY;
   }
 
   /**
