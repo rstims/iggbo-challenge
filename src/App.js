@@ -26,8 +26,9 @@ class App extends Component {
     };
 
     // Intantiate NYT Service
-    this.nyt                 = new nyt();
-
+    this.nyt          = new nyt();
+    
+    // Set some defaults
     this.pageSize     = 9;
     this.gridSize     = 3;
     this.pseudoDelay  = 700;
@@ -51,18 +52,18 @@ class App extends Component {
     };
 
     return Bluebird.resolve()
-      .return(this.nyt.get(options))
-      .then((res) => {
-        const rawArticles = _.get(res,"results",[]);
-        // Shuffle to give a feeling of dynamism
-        const articles = _.shuffle(rawArticles);
-        const count = _.get(res,"num_results",[]);
-        this.setState({
-          articles,
-          count,
-          isLoading: false,
-        })
-      });
+    .return(this.nyt.get(options))
+    .then((res) => {
+      const rawArticles = _.get(res,"results",[]);
+      // Shuffle to give a feeling of dynamism
+      const articles = _.shuffle(rawArticles);
+      const count = _.get(res,"num_results",[]);
+      this.setState({
+        articles,
+        count,
+        isLoading: false,
+      })
+    });
   }
 
   /**
@@ -196,6 +197,9 @@ class App extends Component {
    * CardGroup render helper
    */
   renderCardGroup = (group, idx) => {
+    // Update count
+    this.totalShowing += group.length;
+
     if(group.length < this.gridSize){
       const diff = this.gridSize - group.length;
       for(let i = 0;i < diff;i++){
@@ -212,12 +216,20 @@ class App extends Component {
     return <div>Nothing found.</div>; 
   }
 
+  renderResultsCount = () => {
+    const plural = this.totalShowing > 1 ? 's' : '';
+
+    return <div>{`${this.totalShowing} Article${plural} found`}</div>;  
+  }
+
   /**
    * Articles render helper 
    *
    * @state <articles>
    */
   renderArticles = () => {
+    // Reset count
+    this.totalShowing = 0;
 
     // Wrap articles and start chain
     const articlesChain = _(this.state.articles).chain()
@@ -251,6 +263,7 @@ class App extends Component {
             {this.renderHeader()}
             {this.state.isLoading && this.renderLoader()}
             {!this.state.isLoading && this.renderArticles()}
+            {!this.state.isLoading && this.renderResultsCount()}
           </RBS.Col>
         </RBS.Row> 
       </RBS.Container> 
