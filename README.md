@@ -2,7 +2,7 @@
 
 Proof of concept for [this document](https://github.com/iggbo/support/blob/master/dev-candidates.md)
 
-[Demo](http://ryanstimmler.com.s3-website-us-east-1.amazonaws.com/iggbo-challenge/)
+[Demo](https://ryanstimmler.com/iggbo-challenge/index.html)
 
 To run straight from the build file in Chrome, navigate to:
 
