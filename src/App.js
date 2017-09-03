@@ -18,7 +18,7 @@ class App extends Component {
     this.state = {
       isLoading: true,
       articles: [], 
-      count:0,
+      count:9,
       articleIsOpen:[], 
       timezone:'Pacific/Fiji',
       searchTerm:'',
@@ -26,12 +26,14 @@ class App extends Component {
     };
 
     // Intantiate NYT Service
-    this.nyt          = new nyt();
+    this.nyt           = new nyt();
     
     // Set some defaults
-    this.pageSize     = 9;
-    this.gridSize     = 3;
-    this.pseudoDelay  = 700;
+    this.pageSize      = 9;
+    this.gridSize      = 3;
+    this.pseudoDelay   = 700;
+    this.totalShowing  = 0;
+    this.lastShowing   = 0;
   }
 
   /**
@@ -39,6 +41,13 @@ class App extends Component {
    */
   componentDidMount() {
     return setTimeout(() => this.getArticles(), this.pseudoDelay);
+  }
+
+  componentDidUpdate() {
+    if(!_.isEqual(this.totalShowing, this.lastShowing)){
+      this.setState({count: this.totalShowing}); 
+      this.lastShowing = this.totalShowing; 
+    } 
   }
 
   /**
@@ -57,10 +66,9 @@ class App extends Component {
       const rawArticles = _.get(res,"results",[]);
       // Shuffle to give a feeling of dynamism
       const articles = _.shuffle(rawArticles);
-      const count = _.get(res,"num_results",[]);
+
       this.setState({
         articles,
-        count,
         isLoading: false,
       })
     });
@@ -121,7 +129,19 @@ class App extends Component {
     const timzoneOptions    = _.map(moment.tz.names(), (t,i) => <option key={i} value={t}>{t}</option>);
 
     return <RBS.Row>
-      <RBS.Col xs="12" sm="6">
+      <RBS.Col xs="12" sm="4">
+        <RBS.FormGroup>
+          <RBS.Label for="search-term-text">Search</RBS.Label>
+          <RBS.Input 
+            onChange={this.handleSearchChange}
+            value={this.state.searchTerm} 
+            name="searchTerm" 
+            id="search-term-text"
+            placeholder="Start typing..."
+          />
+        </RBS.FormGroup>
+      </RBS.Col>
+      <RBS.Col xs="12" sm="4">
         <RBS.FormGroup onChange={this.handleSectionChange} >
           <RBS.Label for="categories-select">Choose a Section</RBS.Label>
           <RBS.Input type="select" name="section" id="categories-select">
@@ -129,7 +149,7 @@ class App extends Component {
           </RBS.Input>
         </RBS.FormGroup>
       </RBS.Col>
-      <RBS.Col xs="12" sm="6">
+      <RBS.Col xs="12" sm="4">
         <RBS.FormGroup>
           <RBS.Label for="timezone-select">Choose Timezone</RBS.Label>
           <RBS.Input 
@@ -141,18 +161,6 @@ class App extends Component {
           >
             {timzoneOptions}
           </RBS.Input>
-        </RBS.FormGroup>
-      </RBS.Col>
-      <RBS.Col xs="12">
-        <RBS.FormGroup>
-          <RBS.Label for="search-term-text">Search</RBS.Label>
-          <RBS.Input 
-            onChange={this.handleSearchChange}
-            value={this.state.searchTerm} 
-            name="searchTerm" 
-            id="search-term-text"
-            placeholder="Start typing..."
-          />
         </RBS.FormGroup>
       </RBS.Col>
     </RBS.Row>; 
@@ -210,16 +218,13 @@ class App extends Component {
   }
 
   /**
-   * No results render helper
+   * Render number of results 
    */
-  renderNoResults = () => {
-    return <div>Nothing found.</div>; 
-  }
-
   renderResultsCount = () => {
-    const plural = this.totalShowing > 1 ? 's' : '';
+    // Anything but 1 
+    const plural = this.state.count !== 1 ? 's' : '';
 
-    return <div>{`${this.totalShowing} Article${plural} found`}</div>;  
+    return <div>{`${this.state.count} Article${plural} found`}</div>;  
   }
 
   /**
@@ -245,11 +250,7 @@ class App extends Component {
     
     const results = articles.chunk(this.gridSize).map(this.renderCardGroup).value();
 
-    return <RBS.Row> 
-      {
-        results.length > 0 ? results : this.renderNoResults()
-      } 
-    </RBS.Row>;
+    return <RBS.Row>{results}</RBS.Row>;
   }
 
   /**
@@ -260,10 +261,16 @@ class App extends Component {
       <RBS.Container className="articles">
         <RBS.Row>
           <RBS.Col xs="12">
+            <h3>The New York Times</h3>
+            <h1>Top Stories</h1>
+            <hr />
+          </RBS.Col>
+          <RBS.Col xs="12">
             {this.renderHeader()}
             {this.state.isLoading && this.renderLoader()}
-            {!this.state.isLoading && this.renderArticles()}
             {!this.state.isLoading && this.renderResultsCount()}
+            {!this.state.isLoading && <hr />}
+            {!this.state.isLoading && this.renderArticles()}
           </RBS.Col>
         </RBS.Row> 
       </RBS.Container> 
