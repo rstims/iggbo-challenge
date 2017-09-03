@@ -9,7 +9,6 @@
     "lodash": "^4.17.4",
     "moment": "^2.18.1",
     "moment-timezone": "^0.5.13",
-    "momentjs": "^2.0.0",
     "react": "^15.6.1",
     "react-dom": "^15.6.1",
     "react-transition-group": "^1.2.0",
@@ -22,6 +21,7 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
+    "deploy": "npm run build && aws s3 sync build/ s3://ryanstimmler.com/iggbo-challenge --acl=public-read",
     "eject": "react-scripts eject"
   }
 }
