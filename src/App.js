@@ -33,10 +33,18 @@ class App extends Component {
     this.pseudoDelay  = 700;
   }
 
+  /**
+   * Fetch articles from NYT 
+   */
   componentDidMount() {
     return setTimeout(() => this.getArticles(), this.pseudoDelay);
   }
 
+  /**
+   * Fetches articles 
+   *
+   * @param {String} category = default `home`
+   */
   getArticles = (category = "home") => {
     const options = {
      category 
@@ -57,6 +65,11 @@ class App extends Component {
       });
   }
 
+  /**
+   * Handle when search is being typed 
+   *
+   * @param {Object} evt
+   */
   handleSearchChange = (evt) => {
     const searchTerm  = _.get(evt,"target.value","");
 
@@ -65,17 +78,30 @@ class App extends Component {
     }); 
   }
 
+  /**
+   * Handle when section is changed 
+   *
+   * @param {Object} evt
+   */
   handleSectionChange = (evt) => {
     const section = _.get(evt,"target.value","home");
     this.setState({isLoading:true})
     return setTimeout(() => this.getArticles(section), this.pseudoDelay);
   }
 
+  /**
+   * Handle when timezone is changed 
+   *
+   * @param {Object} evt
+   */
   handleTimezoneChange = (evt) => {
     const timezone = _.get(evt,"target.value","Pacific/Fiji");
     return this.setState({timezone});
   }
 
+  /**
+   * Render loading spinner 
+   */
   renderLoader = () => {
     return <div className="spinner">
       <div className="double-bounce1"></div>
@@ -83,6 +109,12 @@ class App extends Component {
     </div>;
   }
 
+  /**
+   * Render filtering and searching tools 
+   *
+   * @state <timezone>
+   * @state <seachTerm>
+   */
   renderHeader = () => {
     const categoriesOptions = _.map(categories, (c,i) => <option key={i} value={c.id}>{c.label}</option>);
     const timzoneOptions    = _.map(moment.tz.names(), (t,i) => <option key={i} value={t}>{t}</option>);
@@ -125,6 +157,11 @@ class App extends Component {
     </RBS.Row>; 
   }
 
+  /**
+   * Article search render helper
+   *
+   * @state <seachTerm>
+   */
   renderSearchArticle = (acc, article, idx) => {
     const searchChecker = (prop) => prop.toLowerCase && prop.toLowerCase().indexOf(this.state.searchTerm.toLowerCase()) > -1;
 
@@ -134,6 +171,12 @@ class App extends Component {
     return acc;
   }
 
+  /**
+   * Article render helper
+   *
+   * @state <timezone>
+   * @state <imageFormat>
+   */
   renderArticle = (acc, article, idx) => {
     if(_.has(article,"multimedia[0].url") && acc.length < this.pageSize){
       acc.push(
@@ -149,6 +192,9 @@ class App extends Component {
     return acc;
   }
 
+  /**
+   * CardGroup render helper
+   */
   renderCardGroup = (group, idx) => {
     if(group.length < this.gridSize){
       const diff = this.gridSize - group.length;
@@ -159,10 +205,18 @@ class App extends Component {
     return <RBS.CardGroup key={idx}>{group}</RBS.CardGroup>; 
   }
 
+  /**
+   * No results render helper
+   */
   renderNoResults = () => {
     return <div>Nothing found.</div>; 
   }
 
+  /**
+   * Articles render helper 
+   *
+   * @state <articles>
+   */
   renderArticles = () => {
 
     // Wrap articles and start chain
@@ -186,6 +240,9 @@ class App extends Component {
     </RBS.Row>;
   }
 
+  /**
+   *  Render
+   */
   render() {
     return (
       <RBS.Container className="articles">

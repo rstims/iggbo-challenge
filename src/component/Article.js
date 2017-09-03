@@ -17,6 +17,13 @@ export default class Article extends Component{
 
   }
 
+  /**
+   * Retrieve date with correct format 
+   *
+   * @props <created_date>
+   * @props <timezone>
+   *
+   */
   getDate = () => {
     const date   = _.get(this.props,"created_date",undefined);
     // FJT isn't part of the moment timezone database
@@ -25,10 +32,25 @@ export default class Article extends Component{
     return moment.tz(date, this.props.timezone).format(format); 
   }
 
+  /**
+   * Retrieve date with correct format 
+   *
+   * @state <tooTipIsOpen>
+   *
+   */
   handleToggleTooltip = () => {
     this.setState({toolTipIsOpen: !this.state.toolTipIsOpen}); 
   }
 
+  /**
+   * Render image block 
+   *
+   * @state <tooTipIsOpen>
+   *
+   * @props <imageFormat>
+   * @props <multimedia>
+   * @props <idx>
+   */
   renderImage = () => {
     const image = _(this.props.multimedia).chain().filter({ format: this.props.imageFormat }).get("[0]",null).value();
 
@@ -46,6 +68,14 @@ export default class Article extends Component{
     </div>;
   }
 
+  /**
+   * Render body block 
+   *
+   * @props <abstract>
+   * @props <section>
+   * @props <title>
+   * @props <url>
+   */
   renderBody = () => {
     const abstrct = _.get(this.props,"abstract",null); 
     const section = _.get(this.props,"section",null); 
@@ -62,10 +92,13 @@ export default class Article extends Component{
     </RBS.CardBlock>;
   }
 
+  /**
+   * Render 
+   */
   render() {
     return <RBS.Card>
         {this.renderImage()}  
         {this.renderBody()}  
     </RBS.Card>; 
   }
-  }
+}
