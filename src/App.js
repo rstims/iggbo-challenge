@@ -23,6 +23,7 @@ class App extends Component {
       timezone:'Pacific/Fiji',
       searchTerm:'',
       imageFormat:'mediumThreeByTwo210',
+      gridSize: 3,
     };
 
     // Intantiate NYT Service
@@ -30,7 +31,6 @@ class App extends Component {
     
     // Set some defaults
     this.pageSize      = 9;
-    this.gridSize      = 3;
     this.pseudoDelay   = 700;
     this.totalShowing  = 0;
     this.lastShowing   = 0;
@@ -72,6 +72,11 @@ class App extends Component {
         isLoading: false,
       })
     });
+  }
+
+  handleGridSizeChange = (evt) => {
+    const gridSize = _.get(evt,"target.value",3); 
+    this.setState({gridSize});
   }
 
   /**
@@ -179,7 +184,28 @@ class App extends Component {
     }
     return acc;
   }
+  
+  renderGridSize = () => {
+    const gridSizeOptions = _.map([1,2,3,4,5,6], (s,i) => <option key={i} value={s}>{s}</option>);
 
+    return <RBS.Row style={{alignItems:'center'}}>
+      <RBS.Col xs="12" sm="6" className="text-right">
+        Grid Size
+      </RBS.Col>
+      <RBS.Col xs="12" sm="6">
+        <RBS.Input 
+          onChange={this.handleGridSizeChange}
+          value={this.state.gridSize} 
+          type="select" 
+          name="gridSize" 
+          id="grid-size-select"
+        >
+          {gridSizeOptions}
+        </RBS.Input>
+      </RBS.Col>
+    </RBS.Row>; 
+  }
+  
   /**
    * Article render helper
    *
@@ -208,8 +234,8 @@ class App extends Component {
     // Update count
     this.totalShowing += group.length;
 
-    if(group.length < this.gridSize){
-      const diff = this.gridSize - group.length;
+    if(group.length < this.state.gridSize){
+      const diff = this.state.gridSize - group.length;
       for(let i = 0;i < diff;i++){
         group.push(<RBS.Card key={Math.random()} className="no-border">{null}</RBS.Card>);  
       } 
@@ -248,7 +274,7 @@ class App extends Component {
       articlesChain.reduce(this.renderSearchArticle, []) : 
       articlesChain.reduce(this.renderArticle, []);
     
-    const results = articles.chunk(this.gridSize).map(this.renderCardGroup).value();
+    const results = articles.chunk(this.state.gridSize).map(this.renderCardGroup).value();
 
     return <RBS.Row>{results}</RBS.Row>;
   }
@@ -268,11 +294,18 @@ class App extends Component {
           <RBS.Col xs="12">
             {this.renderHeader()}
             {this.state.isLoading && this.renderLoader()}
-            {!this.state.isLoading && this.renderResultsCount()}
+            {!this.state.isLoading && <RBS.Row style={{alignItems:'center'}}>
+              <RBS.Col xs="6">
+                {this.renderResultsCount()}
+              </RBS.Col>
+              <RBS.Col xs="6">
+                {this.renderGridSize()}
+              </RBS.Col>
+            </RBS.Row>}
             {!this.state.isLoading && <hr />}
             {!this.state.isLoading && this.renderArticles()}
-          </RBS.Col>
-        </RBS.Row> 
+            </RBS.Col>
+          </RBS.Row> 
       </RBS.Container> 
     );
   }
