@@ -5,6 +5,7 @@
 
 .articles .card-group{
   margin-bottom:30px;
+  width:100%;
 }
 
 .articles .card.no-border{
